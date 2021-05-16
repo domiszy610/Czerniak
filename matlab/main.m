@@ -1,5 +1,5 @@
 close all;
-zdj=imread("6.jpg");
+zdj=imread("3.jpg");
 
 newW = 620;
 newH = 620;
@@ -7,16 +7,16 @@ newH = 620;
 
 [x,y,z] = size(zdj); %x - wysokosc, y - szerokosc
 %resize je¿eli zdj za male
-% if (450<y && y<500 && 450<x && x<500)
-%     y =y+10;
-%     x =x+10;
-%     zdj = imresize(zdj,[x y]);
-% end
-% if(y<450 && x<450)
-%     y =y+20;
-%     x =x+20;
-%     zdj = imresize(zdj,[x y]);
-% end
+if (450<y && y<500 && 450<x && x<500)
+    y =y+10;
+    x =x+10;
+    zdj = imresize(zdj,[x y]);
+end
+if(y<450 && x<450)
+    y =y+20;
+    x =x+20;
+    zdj = imresize(zdj,[x y]);
+end
 
 wH= round((620 - x)/2);
 wW= round((620 - y)/2);
@@ -68,9 +68,6 @@ figure,imshow(FilteredImage2);
 
 zdj_gray = rgb2gray(FilteredImage2);
 [C,U,LUT,H]=FastFCMeans(zdj_gray,2, 1.6);
-
-
- 
 
 figure('color','w')  
 subplot(1,2,1), imshow(zdj_gray)
