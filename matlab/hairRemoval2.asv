@@ -1,0 +1,13 @@
+function filtredImage = hairRemoval2(rgbImage)
+R =rgbImage(:, :, 1);
+G =rgbImage(:, :, 2);
+B =rgbImage(:, :, 3);
+theta = 0:180;
+[~,xp] = radon(rgbImage,theta);
+BWR = edge(R,'prewitt',[],xp);
+BWG = edge(G,'prewitt',[],xp);
+BWB = edge(B,'prewitt',[],xp);
+BW = cat(3,BWR,BWG,BWB);
+filtredImage = BW;
+
+end
