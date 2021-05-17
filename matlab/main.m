@@ -1,5 +1,5 @@
 close all;
-zdj=imread("4.jpg");
+zdj=imread("3.jpg");
 
 newW = 620;
 newH = 620;
@@ -69,5 +69,20 @@ for i=1:3
 end
 
 figure; imshow(img2);
+
+imgB= imbinarize(rgb2gray(img2));
+%% otwarcie zamkniêcie ¿eby wyczyœciæ œmieci
+
+imgB = imfill(imgB,'holes');
+imgB = bwareaopen(imgB,1000);
+figure;imshow(imgB);
+
+%% krawedz
+
+
+se = strel('disk',4, 6)
+imgE= imerode(imgB, se);
+img = imgB-imgE;
+figure;imshow(img);
 
 
