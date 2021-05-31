@@ -72,7 +72,7 @@ figure; imshow(img2);
 
 imgB= imbinarize(rgb2gray(img2));
 %% otwarcie zamkniêcie ¿eby wyczyœciæ œmieci
-
+imgB = imclearborder(imgB, 26);
 imgB = imfill(imgB,'holes');
 imgB = bwareaopen(imgB,1000);
 figure;imshow(imgB);
@@ -82,7 +82,94 @@ figure;imshow(imgB);
 
 se = strel('disk',4, 6)
 imgE= imerode(imgB, se);
-img = imgB-imgE;
-figure;imshow(img);
+edges = imgB-imgE;
+figure;imshow(edges);
 
 
+%% textura
+
+mask = imgB;
+[height, width] = size(mask);
+imageGS = rgb2gray(img2);
+imageGS(~imgB) = 0; 
+
+glcms = graycomatrix(imageGS);
+glcms(1,:) = 0;
+glcms(:,1) = 0;
+stats = graycoprops(glcms,'Contrast Correlation');
+stats1 = graycoprops(glcms,{'energy','homogeneity'});
+kontrast=stats.Contrast;
+energia=stats1.Energy;
+jednorodnosc=stats1.Homogeneity;
+korelacja=stats.Correlation;
+
+%% œrednie wartoœci RGB
+mask = imgB;
+k=5;
+imageRBG = img2;
+imageRBG = bsxfun(@times, imageRBG, cast(mask, 'like', imageRBG));
+% imshow(imageRBG);
+[height, width] = size(mask);
+R=[];
+G=[];
+B=[];
+for i=1:height
+    for j=1:width
+    if(mask(i,j)==1)
+        R= [R;imageRBG(i,j,1)];
+        G= [G;imageRBG(i,j,2)];
+        B= [B;imageRBG(i,j,3)];
+    end
+    end
+end
+
+RGBmean = [round(mean(R)),round(mean(G)), round(mean(B))];
+RGBmedian = [median(R),median(G), median(B)];
+RGBstd = [std(double(R)),std(double(G)),std(double(B))];
+% Rclust = kmeans(R,k);
+% Gclust = kmeans(G,k);
+% Bclust = kmeans(B,k);
+% RGBmeanClust = [Rclust, Gclust, Bclust];
+%% regionprops - cechy maski 
+
+circularity = regionprops(mask, 'Circularity');
+eccentricity = regionprops(mask, 'Eccentricity');
+
+
+%% asymetria
+props = regionprops(mask, 'Centroid', 'Orientation');
+xCentroid = props.Centroid(1);
+yCentroid = props.Centroid(2);
+middlex = width/2;
+middley = height/2;
+deltax = middlex - xCentroid;
+deltay = middley - yCentroid;
+binaryImage = imtranslate(mask,  [deltax, deltay]);
+
+angle = -props.Orientation;
+rotatedImage = imrotate(binaryImage, angle, 'crop');
+
+topArea = sum(sum(binaryImage(1:height/2,:)));
+bottomArea = sum(sum(binaryImage(height/2+1:end,:)));
+areaDifference = abs(topArea - bottomArea);
+
+imshow(rotatedImage);
+axis on;
+% caption = sprintf('Image Rotated by %f Degrees', angle);
+% title(caption, 'fontSize', fontSize);
+% Plot a + at the center of the blob and center of the image.
+hold on;
+line([middlex, middlex], [1, height], 'Color', 'm', 'LineWidth', 2);
+line([1, width], [middley, middley], 'Color', 'm', 'LineWidth', 2);
+drawnow;
+
+%% Border irregularity
+
+[B,L,n,A] = bwboundaries(rotatedImage);
+
+area= regionprops(mask, 'Area');
+perimeter = regionprops(mask, 'Perimeter');
+compactness = (perimeter.Perimeter(1,1)^2)/(4*pi*area.Area(1,1));
+% figure,plot(B{1,1}(:,2), B{1,1}(:,1), 'r*');
+
+FractalDimension = hausDim(edges);
