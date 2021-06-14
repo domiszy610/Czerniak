@@ -46,14 +46,14 @@ test_set = [score(11:20,:);score(31:40,:)];
 test_type = zeros(20,1);
 test_type(11:20,1) =1;
 
-%% UWAGA A
-
-train_set = [score(1:10,:);score(21:30,:)];
-train_type = zeros(20,1);
-train_type(11:20,1) =1;
-test_set = [score(11:20,:);score(31:40,:)];
-test_type = zeros(20,1);
-test_type(11:20,1) =1;
+%% UWAGA ALTERNATYWA
+% 
+% train_set = [dane1(1:10,:);dane1(21:30,:)];
+% train_type = zeros(20,1);
+% train_type(11:20,1) =1;
+% test_set = [dane1(11:20,:);dane1(31:40,:)];
+% test_type = zeros(20,1);
+% test_type(11:20,1) =1;
 
 %% CV - partition
 c = cvpartition(train_type,'k',15);
@@ -69,7 +69,7 @@ X_train_w_best_feature = train_set(:,fs);
 
 Md1 = fitcsvm(X_train_w_best_feature,train_type,'KernelFunction','rbf','OptimizeHyperparameters','auto',...
       'HyperparameterOptimizationOptions',struct('AcquisitionFunctionName',...
-      'expected-improvement-plus','ShowPlots',true)); % Bayes' Optimization ??.
+      'expected-improvement-plus','ShowPlots',true)); % Bayes' Optimization .
 
 
 %% Final test with test set
@@ -84,7 +84,7 @@ hold on;
 h_sv=plot(Md1.SupportVectors(:,1),Md1.SupportVectors(:,2),'ko','markersize',8);
 
 
-% test set? data? ?? ??? ????.
+% test set
 
 gscatter(X_test_w_best_feature(:,1),X_test_w_best_feature(:,2),test_type,'rb','xx')
 
@@ -103,3 +103,9 @@ h2 = plot(dd(pos,1), dd(pos,2),'s','color',bluecolor,'Markersize',5,'MarkerEdgeC
 uistack(h1,'bottom');
 uistack(h2,'bottom');
 legend([hgscatter;h_sv],{'pieprzyki','czerniaki','support vectors'})
+%%
+a =imread('aaa.jpg');
+  [kontrast, energia, jednorodnosc, korelacja, RGBmean, RGBmedian, RGBstd, circularity, eccentricity, areaDifference, compactness, FractalDimension, mask]=cechy(Ip{k});
+  s = struct('Kontrast',kontrast, 'Energia', energia, 'Jednorodnosc', jednorodnosc, 'Korelacja', korelacja,'RGBmean', RGBmean,'RGBmedian', RGBmedian,'RGBstd', RGBstd, 'Circularity',  circularity, 'Eccentricity', eccentricity, 'AreaDifference', areaDifference,'Compactness', compactness,'FractalDimension', FractalDimension, 'Mask', mask);
+
+[magepred, probabilities] = predict(Md1,);

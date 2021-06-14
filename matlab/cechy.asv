@@ -43,10 +43,10 @@ img2(:,:,1) = medfilt2(R,[5,5], 'symmetric');
 img2(:,:,2) = medfilt2(G,[5,5], 'symmetric'); 
 img2(:,:,3) = medfilt2(B,[5,5], 'symmetric');
 % figure,imshow(img2);
-%% SEGMANTACJA
+%%
 
 zdj_gray = uint8(rgb2gray(img2));
-[C,U,LUT,H]=FastFCMeans(zdj_gray,2, 1.6); %segmentacja, 
+[C,U,LUT,H]=FastFCMeans(zdj_gray,2, 1.6);
 
 
 L=LUT2label(zdj_gray,LUT);
@@ -69,7 +69,7 @@ end
 %figure; imshow(img2);
 
 imgB= imbinarize(rgb2gray(img2));
-%% otwarcie zamkniêcie ¿eby wyczyœciæ œmieci -> poprawianie maski, usuwanie artefaktów 
+%% otwarcie zamkniêcie ¿eby wyczyœciæ œmieci
 imgB = imclearborder(imgB, 26);
 imgB = imfill(imgB,'holes');
 imgB = bwareaopen(imgB,1000);
@@ -162,6 +162,8 @@ areaDifference = abs(topArea - bottomArea);
 % drawnow;
 
 %% Border irregularity
+
+% [B,L,n,A] = bwboundaries(rotatedImage);
 
 area= regionprops(mask, 'Area');
 perimeter = regionprops(mask, 'Perimeter');

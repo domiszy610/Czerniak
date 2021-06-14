@@ -18,7 +18,6 @@ for k=1:numel(I)
   s = struct('Kontrast',kontrast, 'Energia', energia, 'Jednorodnosc', jednorodnosc, 'Korelacja', korelacja,'RGBmean', RGBmean,'RGBmedian', RGBmedian,'RGBstd', RGBstd, 'Circularity',  circularity, 'Eccentricity', eccentricity, 'AreaDifference', areaDifference,'Compactness', compactness,'FractalDimension', FractalDimension, 'Mask', mask);
   CechyC{k,1}=s;
 end
-
 %%
 dane =[];
 
@@ -39,24 +38,15 @@ dane1 = single(dane);
 
 %%
 
-train_set = [score(1:10,:);score(21:30,:)];
-train_type = zeros(20,1);
-train_type(11:20,1) =1;
-test_set = [score(11:20,:);score(31:40,:)];
-test_type = zeros(20,1);
-test_type(11:20,1) =1;
-
-%% UWAGA ALTERNATYWA
-% 
-% train_set = [dane1(1:10,:);dane1(21:30,:)];
-% train_type = zeros(20,1);
-% train_type(11:20,1) =1;
-% test_set = [dane1(11:20,:);dane1(31:40,:)];
-% test_type = zeros(20,1);
-% test_type(11:20,1) =1;
+train_set = [score(1:50,:);score(101:150,:)];
+train_type = zeros(100,1);
+train_type(50:100,1) =1;
+test_set = [score(51:100,:);score(151:200,:)];
+test_type = zeros(100,1);
+test_type(50:100,1) =1;
 
 %% CV - partition
-c = cvpartition(train_type,'k',15);
+c = cvpartition(train_type,'k',50);
 
 opts = statset('display','iter');
 classf = @(train_data, train_labels, test_data, test_labels)...
@@ -115,6 +105,7 @@ dane1 = single(dane);
 danePCA = dane1.*latent';
 X_test_w_best_feature = danePCA(:,fs);
  aaa = predict(Md1,X_test_w_best_feature);
+
 
 
 
