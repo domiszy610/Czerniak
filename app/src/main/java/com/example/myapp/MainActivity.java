@@ -32,6 +32,8 @@ import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -42,6 +44,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicMarkableReference;
 
@@ -57,7 +61,8 @@ public class MainActivity extends AppCompatActivity {
     private String fileName = "image.png";
     private Context context;
     private boolean external;
-
+    public FirebaseDatabase database;
+    public DatabaseReference myRef;
 
 
     @Override
@@ -68,6 +73,8 @@ public class MainActivity extends AppCompatActivity {
         cameraBtn = findViewById(R.id.cameraBtn);
         galleryBtn = findViewById(R.id.galleryBtn);
         storageReference=FirebaseStorage.getInstance().getReference();
+        database = FirebaseDatabase.getInstance("https://my-app-d28bf-default-rtdb.firebaseio.com/");
+        myRef = database.getReference("zdjecia/");
         cameraBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -196,13 +203,16 @@ openCamera();        }
         image.putFile(contenuri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
             @Override
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-image.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-    @Override
-    public void onSuccess(Uri uri) {
-        Log.d("tag","OnScuccses: Uploaded" + uri.toString());
-    }
+            image.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                @Override
+                public void onSuccess(Uri uri) {
+                    Log.d("tag","OnScuccses: Uploaded" + uri.toString());
+                    myRef.setValue(name);
+                    Toast.makeText(MainActivity.this, "Image URL Added to Realtime database", Toast.LENGTH_SHORT).show();
+                }
 });
 Toast.makeText(MainActivity.this, "Image is Uploaded", Toast.LENGTH_SHORT).show();
+
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
