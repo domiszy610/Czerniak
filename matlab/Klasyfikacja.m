@@ -1,12 +1,18 @@
 function wynik = Klasyfikacja(zdj, model)
 
 Md1 = load('CompactSVMModel.mat');
+Md1 = Md1.CompactSVMModel;
 fs1= load('fs.mat');
+fs1= fs1.fs;
 latent1 = load('latent.mat');
+latent1 = latent1.latent;
 
 Md2 = load('CompactSVMModel2.mat');
+Md2 = Md2.CompactSVMModel;
 fs2= load('fs2.mat');
+fs2= fs2.fs;
 latent2 = load('latent2.mat');
+latent2 = latent2.latent;
 wynik = ' ';
 try
 [kontrast, energia, jednorodnosc, korelacja, RGBmean, RGBmedian, RGBstd, circularity, eccentricity, areaDifference, compactness, FractalDimension, mask]=cechy(zdj);
