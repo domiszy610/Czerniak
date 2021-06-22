@@ -28,12 +28,17 @@ import android.view.View;
 import android.webkit.MimeTypeMap;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.database.annotations.NotNull;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -55,6 +60,7 @@ public class MainActivity extends AppCompatActivity {
     public static final int GALLERY_REQUEST_CODE = 103;
     ImageView selectedImage;
     Button cameraBtn, galleryBtn;
+    TextView textView;
     String currentPhotoPath;
     StorageReference storageReference;
     private String directoryName = "images";
@@ -63,6 +69,8 @@ public class MainActivity extends AppCompatActivity {
     private boolean external;
     public FirebaseDatabase database;
     public DatabaseReference myRef;
+    public DatabaseReference ref;
+    public DatabaseReference myRefWyn;
 
 
     @Override
@@ -72,9 +80,13 @@ public class MainActivity extends AppCompatActivity {
         selectedImage = findViewById(R.id.imageView);
         cameraBtn = findViewById(R.id.cameraBtn);
         galleryBtn = findViewById(R.id.galleryBtn);
+        textView = findViewById(R.id.textView);
         storageReference=FirebaseStorage.getInstance().getReference();
         database = FirebaseDatabase.getInstance("https://my-app-d28bf-default-rtdb.firebaseio.com/");
         myRef = database.getReference("zdjecia/");
+        ref = database.getReference();
+        myRefWyn= database.getReference("wyniki/");
+        textView.setText("");
         cameraBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -88,6 +100,7 @@ public class MainActivity extends AppCompatActivity {
                 startActivityForResult(gallery, GALLERY_REQUEST_CODE);
             }
         });
+
     }
     public void saveImage(Context context, Bitmap bitmap, String name, String extension){
         name = name + "." + extension;
@@ -128,6 +141,7 @@ openCamera();        }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        textView.setText("");
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE_CAMERA) {
             Bitmap image = (Bitmap) data.getExtras().get("data");
@@ -170,6 +184,7 @@ openCamera();        }
                 selectedImage.setImageURI(contentUri);
                 uploadImageToFirebase(imageFileName, contentUri);
 
+
             }
         }
     }
@@ -199,6 +214,8 @@ openCamera();        }
     }
 
     private void uploadImageToFirebase(String name, Uri contenuri) {
+        myRefWyn.removeValue();
+        textView.setText("Trwa przetwarzanie...");
         StorageReference image= storageReference.child("pictures/"+name);
         image.putFile(contenuri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
             @Override
@@ -208,7 +225,29 @@ openCamera();        }
                 public void onSuccess(Uri uri) {
                     Log.d("tag","OnScuccses: Uploaded" + uri.toString());
                     myRef.setValue(name);
-                    Toast.makeText(MainActivity.this, "Image URL Added to Realtime database", Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(MainActivity.this, "Image URL Added to Realtime database", Toast.LENGTH_SHORT).show();
+                    String name1 = name.substring(0,name.length()-4);
+
+                    int i = 0;
+                    myRefWyn.addValueEventListener(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NotNull DataSnapshot dataSnapshot) {
+                                // This method is called once with the initial value and again
+                                // whenever data at this location is updated.
+                                if(dataSnapshot != null) {
+                                    String value = dataSnapshot.getValue(String.class);
+                                    textView.setText(value);
+                                    //myRefWyn.removeValue();
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(@NotNull DatabaseError error) {
+                                // Failed to read value
+                                textView.setText("Wystąpił błąd");
+                            }
+                        });
+
                 }
 });
 Toast.makeText(MainActivity.this, "Image is Uploaded", Toast.LENGTH_SHORT).show();
@@ -221,7 +260,9 @@ Toast.makeText(MainActivity.this, "Image is Uploaded", Toast.LENGTH_SHORT).show(
             }
         });
     }
+    //private void ListenOnChanges(){
 
+    //}
 
     private File createFileImage() throws IOException {
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
@@ -236,6 +277,7 @@ Toast.makeText(MainActivity.this, "Image is Uploaded", Toast.LENGTH_SHORT).show(
         return image;
 
     }
+
 
 //    private void dispatchTakePictureIntent() {
 //        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
